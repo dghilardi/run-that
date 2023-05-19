@@ -3,6 +3,7 @@ name = "run-that"
 version = "0.1.0"
 edition = "2021"
 authors = ["Davide Ghilardi <dghila@d71.dev>"]
+
 description = "Run scripts from centralized repo"
 keywords = [ "cli", "tool", "script", "runner" ]
 repository = "https://github.com/dghilardi/run-that"
