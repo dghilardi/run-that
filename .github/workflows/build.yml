@@ -28,23 +28,23 @@ jobs:
         mkdir builds
     - name: Build Win64
       run: |
-        cargo rustc --bin pucli --release --target=x86_64-pc-windows-gnu -- -C linker=x86_64-w64-mingw32-gcc
-        mkdir builds/pucli-win64
-        cp target/x86_64-pc-windows-gnu/release/pucli.exe builds/pucli-win64
-        tar -C builds -czvf dist/pucli-win64.tar.gz pucli-win64
+        cargo rustc --bin run-that --release --target=x86_64-pc-windows-gnu -- -C linker=x86_64-w64-mingw32-gcc
+        mkdir builds/run-that-win64
+        cp target/x86_64-pc-windows-gnu/release/run-that.exe builds/run-that-win64
+        tar -C builds -czvf dist/run-that-win64.tar.gz run-that-win64
     - name: Build Linux
       run: |
-        cargo rustc --bin pucli --release --target=x86_64-unknown-linux-gnu
-        mkdir builds/pucli-linux
-        cp target/x86_64-unknown-linux-gnu/release/pucli builds/pucli-linux
-        tar -C builds -czvf dist/pucli-linux.tar.gz pucli-linux
+        cargo rustc --bin run-that --release --target=x86_64-unknown-linux-gnu
+        mkdir builds/run-that-linux
+        cp target/x86_64-unknown-linux-gnu/release/run-that builds/run-that-linux
+        tar -C builds -czvf dist/run-that-linux.tar.gz run-that-linux
     - name: Upload release
       uses: softprops/action-gh-release@v1
       with:
         # body_path: CHANGELOG.md # TBD
         files: |
-          dist/pucli-win64.tar.gz
-          dist/pucli-linux.tar.gz
+          dist/run-that-win64.tar.gz
+          dist/run-that-linux.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
