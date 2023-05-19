@@ -11,5 +11,8 @@ license = "MIT"
 readme = "README.md"
 
 [dependencies]
+anyhow = "1.0.71"
 clap = { version = "4.2.7", features = ["derive"] }
+config = "0.13.3"
+serde = "1.0.163"
 update-informer = "1.0.0"

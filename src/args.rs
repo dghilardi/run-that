@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser, Debug)]
@@ -17,6 +18,8 @@ pub enum Commands {
 pub struct RunArgs {
     #[clap(long, short)]
     pub script: String,
+    #[clap(long, short)]
+    pub path: Option<PathBuf>,
     #[clap(num_args = 0.., required = false)]
     pub script_args: Vec<String>,
 }

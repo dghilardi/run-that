@@ -1,15 +1,26 @@
+use anyhow::Context;
 use clap::Parser;
 use crate::args::{Commands, RunThatCli};
+use crate::config::load_config;
 
 mod args;
+mod config;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     check_version();
     let args: RunThatCli = RunThatCli::parse();
 
     match args.subcommand {
-        Commands::Run(run_args) => println!("Run {} -- {:?}", run_args.script, run_args.script_args),
+        Commands::Run(run_args) => {
+            let cwd = run_args.path.or_else(|| std::env::current_dir().ok())
+                .context("Cannot load cwd")?;
+
+            let config = load_config(cwd)
+                .context("Error parsing config")?;
+            println!("Run {} -- {:?}", run_args.script, run_args.script_args)
+        },
     }
+    Ok(())
 }
 
 fn check_version() {
