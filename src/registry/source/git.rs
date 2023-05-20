@@ -1,9 +1,12 @@
 use std::fs;
+use std::ops::Add;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use anyhow::bail;
+use chrono::{Duration, Utc};
 
 use crate::config::GitSourceConfig;
+use crate::registry::source::cache::CacheMeta;
 use crate::registry::source::RepoSource;
 
 impl RepoSource for GitSourceConfig {
@@ -11,7 +14,29 @@ impl RepoSource for GitSourceConfig {
         let cache_path = self.build_cache_path();
         fs::create_dir_all(&cache_path)?;
 
-        self.update_head(&cache_path)?;
+        let cache_meta_path = cache_path.join("meta.toml");
+        let cache_meta: Option<CacheMeta> = if cache_meta_path.is_file() {
+            Some(toml::from_str(&fs::read_to_string(&cache_meta_path)?)?)
+        } else {
+            None
+        };
+
+        match cache_meta {
+            None => {
+                self.update_head(&cache_path)?;
+                let cache_meta_str = toml::to_string_pretty(&CacheMeta { last_update: Utc::now() })?;
+                fs::write(&cache_meta_path, cache_meta_str)?;
+            }
+            Some(mut meta) if meta.last_update.add(Duration::days(1)) < Utc::now() => {
+                self.update_head(&cache_path)?;
+                meta.last_update = Utc::now();
+                let cache_meta_str = toml::to_string_pretty(&meta)?;
+                fs::write(&cache_meta_path, cache_meta_str)?;
+            },
+            Some(_) => {
+                println!("Skip cache update for {}", self.repo_name())
+            }
+        }
         let dir = self.verify_ref_dir(&cache_path)?;
 
         Ok(dir)
