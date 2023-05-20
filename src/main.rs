@@ -17,11 +17,11 @@ fn main() -> anyhow::Result<()> {
             let cwd = run_args.path.or_else(|| std::env::current_dir().ok())
                 .context("Cannot load cwd")?;
 
-            let config = load_config(cwd)
+            let config = load_config(&cwd)
                 .context("Error parsing config")?;
 
             let registry = MultiRegistry::initialize(config.buckets())?;
-            println!("Run {} -- {:?}", run_args.script, run_args.script_args)
+            registry.run_script(&run_args.script, &run_args.script_args, cwd.as_path())?;
         },
     }
     Ok(())
