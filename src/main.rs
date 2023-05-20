@@ -2,9 +2,11 @@ use anyhow::Context;
 use clap::Parser;
 use crate::args::{Commands, RunThatCli};
 use crate::config::load_config;
+use crate::registry::multi_registry::MultiRegistry;
 
 mod args;
 mod config;
+mod registry;
 
 fn main() -> anyhow::Result<()> {
     check_version();
@@ -17,6 +19,8 @@ fn main() -> anyhow::Result<()> {
 
             let config = load_config(cwd)
                 .context("Error parsing config")?;
+
+            let registry = MultiRegistry::initialize(config.buckets())?;
             println!("Run {} -- {:?}", run_args.script, run_args.script_args)
         },
     }

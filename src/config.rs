@@ -18,10 +18,13 @@ pub struct ScriptBucketDefinition {
 #[derive(Deserialize)]
 #[serde(tag = "type")]
 pub enum ScriptSource {
-    Git {
-        url: String,
-        reference: String,
-    }
+    Git(GitSourceConfig)
+}
+
+#[derive(Deserialize)]
+pub struct GitSourceConfig {
+    pub url: String,
+    pub reference: String,
 }
 
 impl RunThatConfig {
