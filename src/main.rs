@@ -35,6 +35,6 @@ fn check_version() {
     let version = env!("CARGO_PKG_VERSION");
     let informer = update_informer::new(Crates, name, version);
     if let Some(version) = informer.check_version().ok().flatten()  {
-        println!("New version is available: {}", version);
+        eprintln!("New version is available: {}", version);
     }
 }

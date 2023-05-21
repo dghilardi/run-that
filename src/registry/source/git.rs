@@ -34,7 +34,7 @@ impl RepoSource for GitSourceConfig {
                 fs::write(&cache_meta_path, cache_meta_str)?;
             },
             Some(_) => {
-                println!("Skip cache update for {}", self.repo_name())
+                eprintln!("Skip cache update for {}", self.repo_name())
             }
         }
         let dir = self.verify_ref_dir(&cache_path)?;
@@ -76,7 +76,7 @@ impl GitSourceConfig {
                 .current_dir(head_dir)
                 .stdin(Stdio::inherit())
                 .stderr(Stdio::inherit())
-                .stdout(Stdio::inherit())
+                .stdout(Stdio::null())
                 .output()?;
 
             if out.status.success() {
@@ -91,7 +91,7 @@ impl GitSourceConfig {
                 .arg(head_dir)
                 .stdin(Stdio::inherit())
                 .stderr(Stdio::inherit())
-                .stdout(Stdio::inherit())
+                .stdout(Stdio::null())
                 .output()?;
 
             if out.status.success() {
@@ -113,7 +113,7 @@ impl GitSourceConfig {
                 .current_dir(cache_dir.join("HEAD"))
                 .stdin(Stdio::inherit())
                 .stderr(Stdio::inherit())
-                .stdout(Stdio::inherit())
+                .stdout(Stdio::null())
                 .output()?;
 
             if out.status.success() {
