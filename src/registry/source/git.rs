@@ -27,7 +27,7 @@ impl RepoSource for GitSourceConfig {
                 let cache_meta_str = toml::to_string_pretty(&CacheMeta { last_update: Utc::now() })?;
                 fs::write(&cache_meta_path, cache_meta_str)?;
             }
-            Some(mut meta) if meta.last_update.add(Duration::days(1)) < Utc::now() => {
+            Some(mut meta) if meta.last_update.add(Duration::days(1)) < Utc::now() || !cache_path.join(&self.reference).is_dir() => {
                 self.update_head(&cache_path)?;
                 meta.last_update = Utc::now();
                 let cache_meta_str = toml::to_string_pretty(&meta)?;
