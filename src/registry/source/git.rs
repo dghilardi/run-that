@@ -73,6 +73,7 @@ impl GitSourceConfig {
         if head_dir.is_dir() {
             let out = Command::new("git")
                 .arg("pull")
+                .arg("--ff-only")
                 .current_dir(head_dir)
                 .stdin(Stdio::inherit())
                 .stderr(Stdio::inherit())
