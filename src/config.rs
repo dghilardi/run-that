@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::path::Path;
-use config::{Config, ConfigBuilder, File, FileFormat};
+use config::{Config, File, FileFormat};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
