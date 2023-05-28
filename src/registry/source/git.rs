@@ -32,7 +32,7 @@ impl RepoSource for GitSourceConfig {
                 meta.last_update = Utc::now();
                 let cache_meta_str = toml::to_string_pretty(&meta)?;
                 fs::write(&cache_meta_path, cache_meta_str)?;
-            },
+            }
             Some(_) => {
                 eprintln!("Skip cache update for {}", self.repo_name())
             }
@@ -118,12 +118,66 @@ impl GitSourceConfig {
                 .output()?;
 
             if out.status.success() {
+                self.check_repo_updated(&ref_dir)?;
+
                 Ok(ref_dir)
             } else {
                 bail!("Error creating worktree for {} [{}]", self.reference, out.status)
             }
         } else {
+            self.check_repo_updated(&ref_dir)?;
             Ok(ref_dir)
+        }
+    }
+
+    fn check_repo_updated(&self, dir: &Path) -> anyhow::Result<()> {
+        let distance = self.get_commit_distance(dir, "HEAD", "origin/HEAD")?;
+        if distance > 0 {
+            eprintln!("WARNING: origin/HEAD is {distance} commit ahead from {} in repo {}", self.reference, self.url);
+        } else {
+            println!("Zero distance...");
+        }
+        Ok(())
+    }
+
+    fn get_commit_distance(&self, dir: &Path, ref_a: &str, ref_b: &str) -> anyhow::Result<usize> {
+        let hash_a = self.get_commit_hash(dir, ref_a)?;
+        let hash_b = self.get_commit_hash(dir, ref_b)?;
+
+        if hash_a.eq(&hash_b) {
+            return Ok(0);
+        }
+
+        let out = Command::new("git")
+            .arg("rev-list")
+            .arg(format!("{hash_a}...{hash_b}"))
+            .current_dir(dir)
+            .output()?;
+
+        if out.status.success() {
+            let rev_list_out = String::from_utf8(out.stdout)?;
+            Ok(
+                rev_list_out
+                    .split('\n')
+                    .filter(|s| !s.is_empty())
+                    .count()
+            )
+        } else {
+            bail!("Error getting distance ({ref_a} .. {ref_b}) for {} [{}]", self.reference, out.status)
+        }
+    }
+
+    fn get_commit_hash(&self, dir: &Path, commit_ref: &str) -> anyhow::Result<String> {
+        let out = Command::new("git")
+            .arg("rev-parse")
+            .arg(commit_ref)
+            .current_dir(dir)
+            .output()?;
+
+        if out.status.success() {
+            Ok(String::from_utf8(out.stdout)?.trim().to_string())
+        } else {
+            bail!("Error getting {commit_ref} for {} [{}]", self.reference, out.status)
         }
     }
 }
