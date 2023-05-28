@@ -43,13 +43,19 @@ pub fn load_config(working_dir: impl AsRef<Path>) -> anyhow::Result<RunThatConfi
     let mut builder = Config::builder();
     let mut dir = working_dir.as_ref();
 
+    let mut paths = vec![];
+
     loop {
         let config_dir = dir.join(".run-that");
-        builder = builder.add_source(File::from(config_dir).format(FileFormat::Toml).required(false));
+        paths.push(File::from(config_dir).format(FileFormat::Toml).required(false));
         let Some(parent) = dir.parent() else {
             break;
         };
         dir = parent;
+    }
+
+    for path in paths.into_iter().rev() {
+        builder = builder.add_source(path);
     }
 
     let s = builder.build()?;
