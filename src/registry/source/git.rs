@@ -134,8 +134,6 @@ impl GitSourceConfig {
         let distance = self.get_commit_distance(dir, "HEAD", "origin/HEAD")?;
         if distance > 0 {
             eprintln!("WARNING: origin/HEAD is {distance} commit ahead from {} in repo {}", self.reference, self.url);
-        } else {
-            println!("Zero distance...");
         }
         Ok(())
     }
