@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 use std::str::FromStr;
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use config::{Config, File, FileFormat};
 use serde::de::Error;
 use serde::Deserialize;
@@ -53,21 +53,29 @@ fn deserialize_source_from_str<'de, D>(deserializer: D) -> Result<InnerScriptBuc
         D: serde::Deserializer<'de>,
 {
     let value = String::deserialize(deserializer)?;
-    let Some(sep_idx) = value.find(':') else {
-        return Err(D::Error::custom("could not find ':' separator"));
-    };
+    InnerScriptBucketDefinition::from_str(&value)
+        .map_err(|err| D::Error::custom(err.to_string()))
+}
 
-    let source = match &value[0..sep_idx] {
-        "git" => GitSourceConfig::from_str(&value[sep_idx+1..])
-            .map(ScriptSource::Git)
-            .map_err(|e| D::Error::custom(e.to_string())),
-        o => Err(D::Error::custom(format!("{o} source type is not currently handled")))
-    }?;
+impl FromStr for InnerScriptBucketDefinition {
+    type Err = anyhow::Error;
 
-    Ok(InnerScriptBucketDefinition {
-        priority: Default::default(),
-        source,
-    })
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let Some(sep_idx) = value.find(':') else {
+            return Err(anyhow!("could not find ':' separator"));
+        };
+
+        let source = match &value[0..sep_idx] {
+            "git" => GitSourceConfig::from_str(&value[sep_idx+1..])
+                .map(ScriptSource::Git)?,
+            o => bail!("{o} source type is not currently handled")
+        };
+
+        Ok(InnerScriptBucketDefinition {
+            priority: Default::default(),
+            source,
+        })
+    }
 }
 
 #[derive(Deserialize)]

@@ -1,7 +1,8 @@
+use std::str::FromStr;
 use anyhow::Context;
 use clap::Parser;
 use crate::args::{Commands, RunThatCli};
-use crate::config::load_config;
+use crate::config::{InnerScriptBucketDefinition, load_config, ScriptBucketDefinition, ScriptBucketDefinitionDes};
 use crate::registry::multi_registry::MultiRegistry;
 
 mod args;
@@ -20,7 +21,11 @@ fn main() -> anyhow::Result<()> {
             let config = load_config(&cwd)
                 .context("Error parsing config")?;
 
-            let registry = MultiRegistry::initialize(config.buckets())?;
+            let registry = if let Some(custom_registry) = run_args.bucket {
+                MultiRegistry::initialize(vec![&InnerScriptBucketDefinition::from_str(&custom_registry).map(ScriptBucketDefinitionDes::FromStr)?.into()])?
+            } else {
+                MultiRegistry::initialize(config.buckets())?
+            };
             registry.run_script(&run_args.script, &run_args.script_args, cwd.as_path())?;
         },
     }

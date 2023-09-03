@@ -17,6 +17,8 @@ pub enum Commands {
 #[derive(Args, Debug)]
 pub struct RunArgs {
     #[clap(long, short)]
+    pub bucket: Option<String>,
+    #[clap(long, short)]
     pub script: String,
     #[clap(long, short)]
     pub path: Option<PathBuf>,
