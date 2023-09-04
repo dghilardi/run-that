@@ -8,6 +8,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct RunThatConfig {
+    #[serde(default)]
     buckets: HashMap<String, Option<ScriptBucketDefinition>>,
 }
 
